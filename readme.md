@@ -1,4 +1,12 @@
-<h1 align="center"><img height="150" src="./demo/images/driver.png" /><br> Driver.js</h1>
+<h1 align="center"><img height="150" src="./demo/images/driver.png" />A Better Driver.js</h1>
+
+An objectively better version of Driver.js that fixes the following design flaws of the original repo:
+
+- `title` property for steps is now optional
+- Programmatic clicks you may trigger during the tour no longer confuse Driver.js
+- The popup w/ description changed to use more subtle and less dated UI
+- Dynamic elements now work (element no longer needs to exist prior to Driver.js triggering a stage requiring it)
+- Reusing the same element in multiple steps is now allowed
 
 <p align="center">
   <a href="https://github.com/kamranahmedse/driver.js/blob/master/license">

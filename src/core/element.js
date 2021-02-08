@@ -47,12 +47,11 @@ export default class Element {
    * @public
    */
   isInView() {
-    let top = this.node.offsetTop;
-    let left = this.node.offsetLeft;
-    const width = this.node.offsetWidth;
-    const height = this.node.offsetHeight;
-
-    let el = this.node;
+    let el = this.getNode();
+    let top = el.offsetTop;
+    let left = el.offsetLeft;
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
 
     while (el.offsetParent) {
       el = el.offsetParent;
@@ -73,7 +72,7 @@ export default class Element {
    * @private
    */
   scrollManually() {
-    const elementRect = this.node.getBoundingClientRect();
+    const elementRect = this.getNode().getBoundingClientRect();
     const absoluteElementTop = elementRect.top + this.window.pageYOffset;
     const middle = absoluteElementTop - (this.window.innerHeight / 2);
 
@@ -85,19 +84,20 @@ export default class Element {
    * @public
    */
   bringInView() {
+    const el = this.getNode();
     // If the node is not there or already is in view
-    if (!this.node || this.isInView()) {
+    if (!el || this.isInView()) {
       return;
     }
 
     // If browser does not support scrollIntoView
-    if (!this.node.scrollIntoView) {
+    if (!el.scrollIntoView) {
       this.scrollManually();
       return;
     }
 
     try {
-      this.node.scrollIntoView(this.options.scrollIntoViewOptions || {
+      el.scrollIntoView(this.options.scrollIntoViewOptions || {
         behavior: 'instant',
         block: 'center',
       });
@@ -120,7 +120,7 @@ export default class Element {
 
     const scrollTop = this.window.pageYOffset || documentElement.scrollTop || body.scrollTop;
     const scrollLeft = window.pageXOffset || documentElement.scrollLeft || body.scrollLeft;
-    const elementRect = this.node.getBoundingClientRect();
+    const elementRect = this.getNode().getBoundingClientRect();
 
     return new Position({
       top: elementRect.top + scrollTop,
@@ -168,11 +168,11 @@ export default class Element {
    * @public
    */
   isSame(element) {
-    if (!element || !element.node) {
+    if (!element || !element.getNode()) {
       return false;
     }
 
-    return element.node === this.node;
+    return element.getNode() === this.getNode();
   }
 
   /**
@@ -212,8 +212,9 @@ export default class Element {
    * @private
    */
   removeHighlightClasses() {
-    this.node.classList.remove(CLASS_DRIVER_HIGHLIGHTED_ELEMENT);
-    this.node.classList.remove(CLASS_POSITION_RELATIVE);
+    const el = this.getNode();
+    el.classList.remove(CLASS_DRIVER_HIGHLIGHTED_ELEMENT);
+    el.classList.remove(CLASS_POSITION_RELATIVE);
 
     const stackFixes = this.document.querySelectorAll(`.${CLASS_FIX_STACKING_CONTEXT}`);
     for (let counter = 0; counter < stackFixes.length; counter++) {
@@ -227,11 +228,12 @@ export default class Element {
    * @private
    */
   addHighlightClasses() {
-    this.node.classList.add(CLASS_DRIVER_HIGHLIGHTED_ELEMENT);
+    const el = this.getNode();
+    el.classList.add(CLASS_DRIVER_HIGHLIGHTED_ELEMENT);
 
     // Don't make relative if element already has some position set
     if (this.canMakeRelative()) {
-      this.node.classList.add(CLASS_POSITION_RELATIVE);
+      el.classList.add(CLASS_POSITION_RELATIVE);
     }
 
     // Check and re-define the stacking context
@@ -244,7 +246,7 @@ export default class Element {
    * @private
    */
   fixStackingContext() {
-    let parentNode = this.node.parentNode;
+    let parentNode = this.getNode().parentNode;
     while (parentNode) {
       if (!parentNode.tagName || parentNode.tagName.toLowerCase() === 'body') {
         break;
@@ -299,7 +301,7 @@ export default class Element {
    * @private
    */
   getStyleProperty(property) {
-    return getStyleProperty(this.node, property);
+    return getStyleProperty(this.getNode(), property);
   }
 
   /**
@@ -316,7 +318,7 @@ export default class Element {
    * @public
    */
   getNode() {
-    return this.node;
+    return typeof this.node === 'function' ? this.node() : this.node;
   }
 
   /**
@@ -384,9 +386,10 @@ export default class Element {
    * @public
    */
   getSize() {
+    const el = this.getNode();
     return {
-      height: Math.max(this.node.scrollHeight, this.node.offsetHeight),
-      width: Math.max(this.node.scrollWidth, this.node.offsetWidth),
+      height: Math.max(el.scrollHeight, el.offsetHeight),
+      width: Math.max(el.scrollWidth, el.offsetWidth),
     };
   }
 }

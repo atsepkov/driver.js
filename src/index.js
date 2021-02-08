@@ -109,6 +109,11 @@ export default class Driver {
    * @private
    */
   onClick(e) {
+    // only react to user-triggered clicks, not programmatic ones
+    if (!e.isTrusted) {
+      return;
+    }
+
     if (!this.isActivated || !this.hasHighlightedElement()) {
       return;
     }
@@ -121,7 +126,7 @@ export default class Driver {
     const highlightedElement = this.overlay.getHighlightedElement();
     const popover = this.document.getElementById(ID_POPOVER);
 
-    const clickedHighlightedElement = highlightedElement.node.contains(e.target);
+    const clickedHighlightedElement = highlightedElement.getNode().contains(e.target);
     const clickedPopover = popover && popover.contains(e.target);
 
     // Perform the 'Next' operation when clicked outside the highlighted element
@@ -318,7 +323,7 @@ export default class Driver {
    */
   hasHighlightedElement() {
     const highlightedElement = this.overlay.getHighlightedElement();
-    return highlightedElement && highlightedElement.node;
+    return highlightedElement && highlightedElement.getNode();
   }
 
   /**
@@ -386,13 +391,13 @@ export default class Driver {
 
     // If the given element is a query selector or a DOM element?
     const domElement = isDomElement(querySelector) ? querySelector : this.document.querySelector(querySelector);
-    if (!domElement) {
+    if (!domElement && !isStepDefinition) {
       console.warn(`Element to highlight ${querySelector} not found`);
       return null;
     }
 
     let popover = null;
-    if (elementOptions.popover && elementOptions.popover.title) {
+    if (elementOptions.popover) {
       const mergedClassNames = [
         this.options.className,
         elementOptions.popover.className,
@@ -415,7 +420,7 @@ export default class Driver {
     const stage = new Stage(stageOptions, this.window, this.document);
 
     return new Element({
-      node: domElement,
+      node: () => (isDomElement(querySelector) ? querySelector : this.document.querySelector(querySelector)),
       options: elementOptions,
       popover,
       stage,

@@ -62,11 +62,6 @@ export default class Overlay {
       return;
     }
 
-    // If highlighted element is not changed from last time
-    if (element.isSame(this.highlightedElement)) {
-      return;
-    }
-
     // There might be hide timer from last time
     // which might be getting triggered
     this.window.clearTimeout(this.hideTimer);
@@ -75,7 +70,7 @@ export default class Overlay {
     element.onHighlightStarted();
 
     // Old element has been deselected
-    if (this.highlightedElement && !this.highlightedElement.isSame(this.lastHighlightedElement)) {
+    if (this.highlightedElement && !this.highlightedElement.isSame(element)) {
       this.highlightedElement.onDeselected();
     }
 
